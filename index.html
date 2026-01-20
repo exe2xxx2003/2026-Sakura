@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026 櫻之京都</title>
+    <!-- Favicon using a data URI for offline compatibility -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>">
+    
+    <!-- Google Fonts (Optional, will fallback to system fonts offline) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS (via CDN for development, but custom styles added for offline resilience) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        /* Custom "Hojicha" Theme Colors & Offline Fallbacks */
+        :root {
+            --hojicha-dark: #5c4a3d;
+            --hojicha-medium: #8c7b6c;
+            --hojicha-light: #eaddcf;
+            --sakura-pink: #ffb7b2;
+            --sakura-light: #ffe4e1;
+            --bg-paper: #f9f6f2;
+            --usj-blue: #1e3a8a;
+            --usj-gold: #fbbf24;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-paper);
+            color: var(--hojicha-dark);
+            padding-bottom: 80px; /* Space for bottom nav if needed, or just breathing room */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Hojicha Theme Classes */
+        .text-hojicha { color: var(--hojicha-dark); }
+        .bg-hojicha { background-color: var(--hojicha-dark); }
+        .bg-hojicha-light { background-color: var(--hojicha-light); }
+        .border-hojicha { border-color: var(--hojicha-dark); }
+        
+        .text-sakura { color: #e08d87; }
+        .bg-sakura { background-color: var(--sakura-pink); }
+        .bg-sakura-light { background-color: var(--sakura-light); }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-paper); 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--hojicha-medium); 
+            border-radius: 4px;
+        }
+
+        /* Tab Navigation */
+        .nav-tabs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 50;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            box-shadow: 0 2px 10px rgba(92, 74, 61, 0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 0;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 12px 5px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--hojicha-medium);
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item.active {
+            color: var(--hojicha-dark);
+            border-bottom-color: var(--sakura-pink);
+            font-weight: 700;
+        }
+
+        .content-section {
+            display: none;
+            padding: 70px 16px 20px 16px; /* Top padding for fixed header */
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(92, 74, 61, 0.05);
+            border: 1px solid rgba(92, 74, 61, 0.1);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 12px 16px;
+            background-color: var(--hojicha-light);
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-body {
+            padding: 16px;
+        }
+
+        /* Timeline Styles */
+        .timeline-item {
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 20px;
+            border-left: 2px solid var(--hojicha-light);
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 6px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--hojicha-dark);
+            border: 2px solid white;
+        }
+
+        .timeline-time {
+            font-size: 0.8rem;
+            color: var(--hojicha-medium);
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .timeline-content {
+            font-size: 1rem;
+            color: var(--hojicha-dark);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin-top: 4px;
+            margin-right: 4px;
+        }
+
+        .tag-transport { background-color: #e0f2fe; color: #0369a1; }
+        .tag-food { background-color: #fce7f3; color: #be185d; }
+        .tag-spot { background-color: #dcfce7; color: #15803d; }
+        .tag-alert { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+        /* Sakura Falling Animation (Pure CSS) */
+        .sakura-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .sakura {
+            position: absolute;
+            background-color: #ffb7b2;
+            border-radius: 100% 0 100% 0;
+            opacity: 0.3;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% { transform: translate(0, -10%) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.6; }
+            100% { transform: translate(20px, 110vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Weather Widget */
+        .weather-widget {
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, #eaddcf 0%, #ffffff 100%);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            border: 1px solid var(--sakura-pink);
+        }
+        
+        .weather-icon {
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+
+        /* Offline Alert */
+        .offline-badge {
+            display: none;
+            background: #fee2e2;
+            color: #991b1b;
+            text-align: center;
+            font-size: 0.75rem;
+            padding: 4px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Sakura Background -->
+    <div class="sakura-container" id="sakuraContainer"></div>
+
+    <!-- Navigation -->
+    <nav class="nav-tabs">
+        <div class="nav-item active" onclick="switchTab('itinerary')">行程</div>
+        <div class="nav-item" onclick="switchTab('accommodation')">住宿</div>
+        <div class="nav-item" onclick="switchTab('transport')">交通/機票</div>
+        <div class="nav-item" onclick="switchTab('food')">餐廳</div>
+    </nav>
+
+    <!-- TAB 1: ITINERARY -->
+    <div id="itinerary" class="content-section active">
+        
+        <!-- Day 1 -->
+        <div class="card">
+            <div class="card-header text-white" style="background-color: var(--hojicha-dark);">
+                <span>Day 1 | 3/31 (二)</span>
+                <span style="font-size:0.8em; opacity:0.9;">抵達 & 藝術之夜</span>
+            </div>
+            <div class="card-body">
+                <!-- Weather API Widget -->
+                <a href="https://tenki.jp/forecast/6/29/6110/" target="_blank" class="weather-widget block hover:opacity-80 transition">
+                    <div class="weather-icon">⛅</div>
+                    <div class="flex-1">
+                        <div class="text-xs text-gray-500 font-bold">京都預測 (點擊查看 Tenki.jp)</div>
+                        <div class="text-sm font-medium" id="weather-d1">Loading API...</div>
+                    </div>
+                    <div class="text-gray-400">➜</div>
+                </a>
+
+                <!-- Timeline -->
+                <div class="timeline-item">
+                    <div class="timeline-time">13:20</div>
+                    <div class="timeline-content">抵達關西機場 (KIX) <span class="tag tag-transport">MM024</span></div>
+                    <div class="text-xs text-gray-500 mt-1">預計出關 1 小時</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">14:30</div>
+                    <div class="timeline-content">搭乘 Haruka 前往京都</div>
+                    <div class="text-xs text-gray-500 mt-1">車程約 75 分鐘 (使用 JR Pass/優惠票)</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">16:30</div>
+                    <div class="timeline-content">Check-in / 水果三明治 Yaoiso</div>
+                    <div class="text-xs text-gray-500 mt-1">四條大宮本店，適合下午茶</div>
+                    <a href="https://maps.app.goo.gl/VfwBcbHUWvSWSfWVA" target="_blank" class="tag tag-spot">地圖</a>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">18:00</div>
+                    <div class="timeline-content">京都 Teamlab (2025新開幕)</div>
+                    <div class="tag tag-alert">⚠️ 需事前購票</div>
+                    <div class="text-xs text-gray-500 mt-1">京都車站東南側</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">19:30</div>
+                    <div class="timeline-content">晚餐 (京都站周邊)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Day 2 -->
+        <div class="card">
+            <div class="card-header text-white" style="background-color: var(--hojicha-dark);">
+                <span>Day 2 | 4/01 (三)</span>
+                <span style="font-size:0.8em; opacity:0.9;">皇家賞櫻 & 極致美食</span>
+            </div>
+            <div class="card-body">
+                <a href="https://tenki.jp/forecast/6/29/6110/" target="_blank" class="weather-widget block hover:opacity-80 transition">
+                    <div class="weather-icon">🌸</div>
+                    <div class="flex-1">
+                        <div class="text-xs text-gray-500 font-bold">京都預測</div>
+                        <div class="text-sm font-medium" id="weather-d2">歷史均溫: 10-18°C</div>
+                    </div>
+                    <div class="text-gray-400">➜</div>
+                </a>
+
+                <div class="timeline-item">
+                    <div class="timeline-time">09:00</div>
+                    <div class="timeline-content">本滿寺 + 京都御苑</div>
+                    <div class="text-xs text-gray-500 mt-1">枝垂櫻名所，步行可達</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">12:00</div>
+                    <div class="timeline-content font-bold">空蟬亭 (熟成豬排)</div>
+                    <div class="tag tag-alert">⚠️ 30天前 0:00 預約</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">14:00</div>
+                    <div class="timeline-content">平安神宮 + 岡崎十石舟</div>
+                    <div class="tag tag-alert">⚠️ 船票需提前官網預約</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">16:30</div>
+                    <div class="timeline-content">秋雅做梅酒 (CHOYA)</div>
+                    <div class="tag tag-spot">體驗</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">18:00</div>
+                    <div class="timeline-content">抹茶 ななや (Nanaya)</div>
+                    <div class="text-xs text-gray-500 mt-1">世界最濃抹茶冰淇淋</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">19:00</div>
+                    <div class="timeline-content font-bold">Kichi Kichi 蛋包飯</div>
+                    <div class="tag tag-alert">⚠️ 週日搶未來4週名額</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Day 3 -->
+        <div class="card">
+            <div class="card-header text-white" style="background-color: var(--hojicha-dark);">
+                <span>Day 3 | 4/02 (四)</span>
+                <span style="font-size:0.8em; opacity:0.9;">嵐山 & 金閣 (移動日)</span>
+            </div>
+            <div class="card-body">
+                <a href="https://tenki.jp/forecast/6/29/6110/" target="_blank" class="weather-widget block hover:opacity-80 transition">
+                    <div class="weather-icon">🎋</div>
+                    <div class="flex-1">
+                        <div class="text-xs text-gray-500 font-bold">京都/大阪預測</div>
+                        <div class="text-sm font-medium" id="weather-d3">歷史均溫: 11-19°C</div>
+                    </div>
+                    <div class="text-gray-400">➜</div>
+                </a>
+
+                <div class="timeline-item">
+                    <div class="timeline-time">08:00</div>
+                    <div class="timeline-content">嵐山 (竹林/渡月橋)</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">12:00</div>
+                    <div class="timeline-content">親子丼 鳥岩楼</div>
+                    <div class="tag tag-food">只開中午</div>
+                    <div class="text-xs text-gray-500 mt-1">12:00-14:00 務必準時</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">14:00</div>
+                    <div class="timeline-content">金閣寺</div>
+                    <div class="text-xs text-gray-500 mt-1">建議搭計程車或公車</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">18:00</div>
+                    <div class="timeline-content">移動至大阪 Check-in</div>
+                    <div class="tag tag-transport">JR/阪急</div>
+                    <div class="text-xs text-gray-500 mt-1">建議住梅田/難波</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Day 4 USJ -->
+        <div class="card border-2" style="border-color: var(--usj-blue);">
+            <div class="card-header text-white" style="background: linear-gradient(90deg, var(--usj-blue), #2563eb);">
+                <span>Day 4 | 4/03 (五)</span>
+                <span style="font-size:0.8em; opacity:0.9;">USJ 大阪環球影城</span>
+            </div>
+            <div class="card-body bg-blue-50">
+                 <a href="https://tenki.jp/forecast/6/30/6200/" target="_blank" class="weather-widget block hover:opacity-80 transition border-blue-200">
+                    <div class="weather-icon">🎢</div>
+                    <div class="flex-1">
+                        <div class="text-xs text-gray-500 font-bold">大阪預測</div>
+                        <div class="text-sm font-medium" id="weather-d4">歷史均溫: 12-20°C</div>
+                    </div>
+                    <div class="text-gray-400">➜</div>
+                </a>
+
+                <div class="timeline-item">
+                    <div class="timeline-time">08:00</div>
+                    <div class="timeline-content font-bold text-blue-900">大阪環球影城 (全日)</div>
+                    <div class="tag" style="background:var(--usj-gold); color:black;">提早排隊</div>
+                    <div class="mt-2 text-sm text-gray-700">
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>建議購買快速通關 (Express Pass)</li>
+                            <li>任天堂世界需抽整理券</li>
+                            <li>哈利波特園區</li>
+                        </ul>
+                    </div>
+                    <a href="https://maps.app.goo.gl/oUxp4fZQsrkPyqdy9" target="_blank" class="mt-3 inline-block text-blue-600 underline text-sm">Google Maps</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bottom padding -->
+        <div class="h-10"></div>
+    </div>
+
+    <!-- TAB 2: ACCOMMODATION -->
+    <div id="accommodation" class="content-section">
+        <h2 class="text-xl font-bold mb-4 pl-2 border-l-4 border-hojicha">住宿安排</h2>
+        
+        <div class="card">
+            <div class="card-header text-white bg-hojicha">
+                <span>Day 1-2 (京都)</span>
+            </div>
+            <div class="card-body">
+                <h3 class="font-bold text-lg mb-1">京都車站 / 四條烏丸 周邊</h3>
+                <p class="text-sm text-gray-600 mb-3">方便前往清水寺、嵐山及搭乘 JR。</p>
+                <div class="flex gap-2">
+                    <span class="tag tag-transport">JR線</span>
+                    <span class="tag tag-transport">地鐵</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header text-white" style="background-color: #4a5568;">
+                <span>Day 3-4 (大阪)</span>
+            </div>
+            <div class="card-body">
+                <h3 class="font-bold text-lg mb-1">梅田 / 難波 (建議)</h3>
+                <p class="text-sm text-gray-600 mb-3">Day 3 晚上從京都移動過來。選擇梅田方便轉乘前往 USJ。</p>
+                <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-200 text-sm text-yellow-800">
+                    <strong>💡 小撇步：</strong> 若要搶 USJ 開門，住在 JR 環狀線沿線 (如大阪站) 最為便利。
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: TRANSPORT & FLIGHTS -->
+    <div id="transport" class="content-section">
+        
+        <h2 class="text-xl font-bold mb-4 pl-2 border-l-4 border-hojicha">航班資訊</h2>
+        <div class="card">
+            <div class="card-body">
+                <div class="flex justify-between items-center mb-2">
+                    <div class="font-bold text-lg">去程 (TPE ➝ KIX)</div>
+                    <div class="tag tag-spot">樂桃 MM024</div>
+                </div>
+                <div class="text-gray-600 mb-2">
+                    <div>📅 2026/03/31 (二)</div>
+                    <div>🕒 抵達時間：13:20</div>
+                    <div>💰 價格紀錄：$6,790</div>
+                </div>
+                <hr class="my-3 border-gray-200">
+                <div class="flex justify-between items-center mb-2">
+                    <div class="font-bold text-lg">回程 (KIX ➝ TPE)</div>
+                    <div class="tag tag-spot">樂桃</div>
+                </div>
+                <div class="text-gray-600">
+                    <div>💰 價格紀錄：$5,089</div>
+                    <div>💵 總計：$11,879 (約 ¥25,038)</div>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="text-xl font-bold mb-4 pl-2 border-l-4 border-hojicha">當地交通</h2>
+        <div class="card">
+            <div class="card-header text-white bg-hojicha">關西機場 ➝ 京都</div>
+            <div class="card-body">
+                <div class="font-bold mb-1">Haruka 特急列車</div>
+                <p class="text-sm text-gray-600 mb-2">最快且舒適，約 75 分鐘。</p>
+                <div class="bg-gray-100 p-2 rounded text-sm">
+                    💡 建議事先購買 Haruka 優惠票或使用 JR Pass。
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header text-white bg-hojicha">京都 ➝ 大阪</div>
+            <div class="card-body">
+                <div class="font-bold mb-1">JR 京都線 (新快速)</div>
+                <p class="text-sm text-gray-600">京都站 → 大阪站 (梅田)，約 30 分鐘。</p>
+                       <div class="font-bold mt-3 mb-1">阪急電鐵</div>
+                <p class="text-sm text-gray-600">河原町/烏丸 → 大阪梅田，便宜且舒適。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 4: RESTAURANTS -->
+    <div id="food" class="content-section">
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-4 rounded shadow-sm">
+            <div class="flex items-center mb-2">
+                <svg class="w-6 h-6 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span class="font-bold text-red-700">必設鬧鐘！預約提醒</span>
+            </div>
+            <ul class="text-sm text-red-800 space-y-2">
+                <li><strong>空蟬亭 (豬排):</strong> 用餐日 <span class="font-bold">前30天</span> 日本時間 0:00 (台灣 23:00)。</li>
+                <li><strong>Kichi Kichi 蛋包飯:</strong> <span class="font-bold">每週日</span> 開放未來4週 (極難搶)。</li>
+                <li><strong>山崎蒸餾所:</strong> 2-3個月前登記抽籤。</li>
+                <li><strong>十石舟船票:</strong> 春季前官網關注開賣。</li>
+            </ul>
+        </div>
+
+        <div class="grid gap-4">
+            <!-- Restaurant Items -->
+            <div class="card">
+                <div class="flex">
+                    <div class="w-1/3 bg-gray-200 relative overflow-hidden">
+                        <div class="absolute inset-0 flex items-center justify-center text-gray-400 text-xs">
+                           豬排
+                        </div>
+                        <!-- Placeholder for image, in real PWA could use base64 -->
+                        <div style="width:100%; height:100%; background:#e5e7eb;"></div> 
+                    </div>
+                    <div class="w-2/3 p-3 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-hojicha">空蟬亭 (熟成豬排)</h3>
+                            <p class="text-xs text-gray-500 mt-1">Day 2 午餐</p>
+                        </div>
+                        <a href="https://maps.app.goo.gl/VStkcwAfQ9zdrDD4A" target="_blank" class="text-right text-sakura font-bold text-sm">Google Maps ➜</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="flex">
+                    <div class="w-1/3 bg-gray-200 relative">
+                        <div class="absolute inset-0 flex items-center justify-center text-gray-400 text-xs">蛋包飯</div>
+                    </div>
+                    <div class="w-2/3 p-3 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-hojicha">Kichi Kichi Omurice</h3>
+                            <p class="text-xs text-gray-500 mt-1">Day 2 晚餐 | 需預約</p>
+                        </div>
+                        <a href="https://maps.app.goo.gl/p6bfnd7XHbUVhANQ8" target="_blank" class="text-right text-sakura font-bold text-sm">Google Maps ➜</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="flex">
+                    <div class="w-1/3 bg-gray-200 relative">
+                         <div class="absolute inset-0 flex items-center justify-center text-gray-400 text-xs">親子丼</div>
+                    </div>
+                    <div class="w-2/3 p-3 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-hojicha">鳥岩楼</h3>
+                            <p class="text-xs text-gray-500 mt-1">Day 3 午餐 | 只開12-14</p>
+                        </div>
+                        <a href="https://maps.app.goo.gl/91gSq3hRiP2m9VdV6" target="_blank" class="text-right text-sakura font-bold text-sm">Google Maps ➜</a>
+                    </div>
+                </div>
+            </div>
+
+             <div class="card">
+                <div class="flex">
+                    <div class="w-1/3 bg-gray-200 relative">
+                         <div class="absolute inset-0 flex items-center justify-center text-gray-400 text-xs">水果三明治</div>
+                    </div>
+                    <div class="w-2/3 p-3 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-hojicha">Fruit parlor Yaoiso</h3>
+                            <p class="text-xs text-gray-500 mt-1">Day 1 | 四條大宮</p>
+                        </div>
+                        <a href="https://maps.app.goo.gl/VfwBcbHUWvSWSfWVA" target="_blank" class="text-right text-sakura font-bold text-sm">Google Maps ➜</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for Logic -->
+    <script>
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            // Hide all contents
+            document.querySelectorAll('.content-section').forEach(el => {
+                el.classList.remove('active');
+            });
+            // Remove active class from nav items
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Show selected content
+            document.getElementById(tabId).classList.add('active');
+            
+            // Set active nav item (simple loop matching)
+            const navs = ['itinerary', 'accommodation', 'transport', 'food'];
+            const index = navs.indexOf(tabId);
+            if(index >= 0) {
+                document.querySelectorAll('.nav-item')[index].classList.add('active');
+            }
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        // Sakura Animation Logic
+        function createSakura() {
+            const container = document.getElementById('sakuraContainer');
+            const petal = document.createElement('div');
+            petal.classList.add('sakura');
+            
+            // Randomize position and size
+            const startLeft = Math.random() * 100;
+            const size = Math.random() * 10 + 5;
+            const duration = Math.random() * 5 + 5;
+            
+            petal.style.left = startLeft + 'vw';
+            petal.style.width = size + 'px';
+            petal.style.height = size + 'px';
+            petal.style.animationDuration = duration + 's';
+            
+            container.appendChild(petal);
+            
+            // Remove after animation
+            setTimeout(() => {
+                petal.remove();
+            }, duration * 1000);
+        }
+
+        // Start Sakura
+        setInterval(createSakura, 800);
+
+        // Weather API Integration (Open-Meteo)
+        // Since 2026 is too far, we fetch CURRENT weather for Kyoto as a demo/placeholder
+        // Logic: Try to fetch. If offline or error, keep default text.
+        async function fetchWeather() {
+            try {
+                // Kyoto coordinates
+                const url = "https://api.open-meteo.com/v1/forecast?latitude=35.0116&longitude=135.7681&current_weather=true&timezone=Asia%2FTokyo";
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+                
+                const temp = data.current_weather.temperature;
+                const code = data.current_weather.weathercode;
+                
+                // Simple WMO code mapping
+                let desc = "晴時多雲";
+                if(code > 3) desc = "有雲/霧";
+                if(code > 50) desc = "有雨";
+                if(code > 70) desc = "雪/冰";
+               const text = `目前京都: ${temp}°C (${desc})`;
+                
+                // Update the generic weather display for demonstration
+                // Since the trip is in 2026, we don't want to mislead, so we label it "Live check"
+                document.getElementById('weather-d1').innerHTML = `<span style="color:#d97706">Live:</span> ${text}`;
+                // Keep history averages for future dates to not be confusing
+                
+            } catch (error) {
+                console.log("Weather fetch failed (likely offline)");
+                document.getElementById('weather-d1').textContent = "無法連線 (離線模式)";
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchWeather();
+        });
+
+    </script>
+</body>
+</html>
+
+      
